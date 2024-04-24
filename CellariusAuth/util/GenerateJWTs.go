@@ -2,35 +2,34 @@ package util
 
 import (
     "fmt"
-   // "time"
    "github.com/gin-gonic/gin"
     "github.com/dgrijalva/jwt-go"
+    "os"
+    "time"
 )
 
-func GenerateJWTs(c*gin.Context)(string, error) {
-    // Create a new token object with the desired claims
+func GenerateJWTs(c*gin.Context,username,userid,usertype string)(string, error) {
+    expirationTime := time.Now().Add(48 * time.Hour)
     token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
-        "sub":   "1234567890",
-        "name":  "John Doe",
-        "admin": true,
-        "exp":   1712704106,
-        "iss":   "https://dev-af7assovbom6a28o.us.auth0.com/",
-        "aud":   "http://localhost:5000/jwt",
+        "sub":   userid,
+        "username":  username,
+        "userid": userid,
+        "usertype": usertype,
+        "exp":   expirationTime.Unix(),
+        "iss":   os.Getenv("ISSUER"),
+        "aud":   os.Getenv("AUDIENCE"),
     })
-
-    // Set the custom header fields
+ 
     token.Header["alg"] = "HS256"
     token.Header["typ"] = "JWT"
-    token.Header["KeyId"] = "rQuFYlFDGSAGXq3JFFvwiLHygSsN51PH"
-
-    // Sign the token with a secret key
-    secret := []byte("rQuFYlFDGSAGXq3JFFvwiLHygSsN51PH")
+    token.Header["KeyId"] = os.Getenv("JWT_SECRET")
+    JWT_SECRET := os.Getenv("JWT_SECRET")
+    secret := []byte(JWT_SECRET)
     tokenString, err := token.SignedString(secret)
     if err != nil {
         panic(err)
     }
 
-    // Print the token string
     fmt.Println(tokenString)
 	c.JSON(200, gin.H{"token": tokenString})
 	return tokenString, nil
