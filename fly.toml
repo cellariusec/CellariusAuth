@@ -1,0 +1,13 @@
+# fly.toml app configuration file generated for cellariusauth on 2024-04-15T11:48:34-05:00
+#
+# See https://fly.io/docs/reference/configuration/ for information about how to use this file.
+#
+
+app = "cellariusauth"
+primary_region = "sjc"
+
+[build]
+
+[env]
+  DB_CONNECTION_STRING = "postgres://hpzgskwm:LAxV-7VwwyrWt7JhWVSN65xsfP1o9GpM@bubble.db.elephantsql.com/hpzgskwm"
+  SECRET = "oswndsobc"
