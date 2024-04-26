@@ -25,9 +25,10 @@ func RefreshToken(c *gin.Context) {
     refreshTokenString := refreshTokenData.RefreshToken
 
     var user models.User
-    //var refreshToken models.RefreshToken
 
-    if err := initializer.DB.Where("token = ?", refreshTokenString).First(&user).Error; err != nil {
+    var refreshToken models.RefreshToken
+
+    if err := initializer.DB.Where("token = ?", refreshTokenString).First(&refreshToken).Error; err != nil {
         c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid refresh token"})
         fmt.Println(err)
         return
