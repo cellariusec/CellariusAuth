@@ -20,6 +20,7 @@ func main(){
 r := gin.Default()
 config := cors.DefaultConfig()
 config.AllowAllOrigins = true
+config.AddAllowHeaders("Authorization", "Content-Type")
 r.Use(cors.New(config))
 r.GET("/ping", func(c *gin.Context){
 	c.JSON(200, gin.H{

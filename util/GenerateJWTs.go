@@ -1,11 +1,13 @@
 package util
 
 import (
-    "fmt"
-   "github.com/gin-gonic/gin"
-    "github.com/dgrijalva/jwt-go"
-    "os"
-    "time"
+	"fmt"
+	"net/http"
+	"os"
+	"time"
+
+	"github.com/dgrijalva/jwt-go"
+	"github.com/gin-gonic/gin"
 )
 
 func GenerateJWTs(c*gin.Context,username,userid,usertype string)(string, error) {
@@ -31,8 +33,28 @@ func GenerateJWTs(c*gin.Context,username,userid,usertype string)(string, error) 
     }
 
     fmt.Println(tokenString)
-	//c.JSON(200, gin.H{"token": tokenString})
-	return tokenString, nil
+
+    cookieName := "jwt_token"
+    cookieMaxAge := int(48 * time.Hour/time.Second)
+    cookieDomain := "localhost"
+    cookiePath := "/"
+    cookieSecure := true
+    cookieHttpOnly := true
+    //cookieSameSite := "strict"
+
+    cookie := &http.Cookie{
+        Name: cookieName,
+        Value: tokenString,
+        MaxAge: cookieMaxAge,
+        Domain: cookieDomain,
+        Path: cookiePath,
+        Secure: cookieSecure,
+        HttpOnly: cookieHttpOnly,
+        //SameSite: http.SameSiteMode(cookieSameSite),
+    }
+    c.SetCookie(cookieName, tokenString, cookieMaxAge, cookiePath, cookieDomain, cookieSecure, cookieHttpOnly)
+    c.Writer.Header().Set("Set-Cookie", cookie.String())
+    return tokenString, nil
 }
 
 
