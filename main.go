@@ -20,8 +20,20 @@ func main(){
 r := gin.Default()
 config := cors.DefaultConfig()
 config.AllowAllOrigins = true
+config.AddAllowMethods("GET", "POST", "PUT", "DELETE","OPTIONS")
 config.AddAllowHeaders("Authorization", "Content-Type")
 r.Use(cors.New(config))
+
+r.OPTIONS("/*path",func(c *gin.Context){
+	if c.Request.Method == "OPTIONS" {
+		c.Header("Access-Control-Allow-Origin", "*")
+		c.Header("Access-Control-Allow-Methods", "GET,POST,OPTIONS") // Update to include OPTIONS
+		c.Header("Access-Control-Allow-Headers", "Authorization, Content-Type")
+		c.Status(204)
+		return
+	}
+	c.Next()
+})
 r.GET("/ping", func(c *gin.Context){
 	c.JSON(200, gin.H{
 		"message": "pong",
