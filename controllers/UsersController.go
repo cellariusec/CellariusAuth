@@ -54,6 +54,7 @@ func Login(c *gin.Context) {
 		Email    string
 		Password string
 		OTPCode  string
+		UserType string
 	}
 
 	if c.Bind(&body) != nil {
@@ -75,7 +76,7 @@ func Login(c *gin.Context) {
 		return
 	}
 
- sessionjwt,err := util.GenerateJWTs(c,user.Email,string(rune(user.ID)),"admin")
+ sessionjwt,err := util.GenerateJWTs(c,user.Email,string(rune(user.ID)),body.UserType)
  if err != nil{
 	 c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to generate token"})
 	 return

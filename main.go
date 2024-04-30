@@ -27,7 +27,7 @@ r.Use(cors.New(config))
 r.OPTIONS("/*path",func(c *gin.Context){
 	if c.Request.Method == "OPTIONS" {
 		c.Header("Access-Control-Allow-Origin", "*")
-		c.Header("Access-Control-Allow-Methods", "GET,POST,OPTIONS") // Update to include OPTIONS
+		c.Header("Access-Control-Allow-Methods", "GET,POST,OPTIONS")
 		c.Header("Access-Control-Allow-Headers", "Authorization, Content-Type")
 		c.Status(204)
 		return
