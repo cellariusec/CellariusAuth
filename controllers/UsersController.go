@@ -81,7 +81,11 @@ func Login(c *gin.Context) {
 	 c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to generate token"})
 	 return
  }
- util.GenerateRefreshToken(c,user.ID)
+ RefreshToken,err := util.GenerateRefreshToken(c,user.ID)
+ if err != nil{
+	 c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to generate token"})
+	 return
+	  }
 
 
 
@@ -101,6 +105,7 @@ func Login(c *gin.Context) {
 	//fmt.Println(string(refreshToken))
 
 	c.JSON(http.StatusOK, gin.H{"token": sessionjwt})
+	c.JSON(http.StatusOK, gin.H{"refreshtoken": RefreshToken })
 }
 
 
