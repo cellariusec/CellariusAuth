@@ -89,23 +89,33 @@ func Login(c *gin.Context) {
 
 
 
-	cookie := &http.Cookie{
-		Name:     "token",
-		Value:    sessionjwt,
-		Path:     "/",
-		Expires:  time.Now().Add(24 * time.Hour),
-		HttpOnly: true,
-	}
+	  cookie := &http.Cookie{
+        Name:     "token",
+        Value:    sessionjwt,
+        Path:     "/",
+        Expires:  time.Now().Add(24 * time.Hour), 
+        HttpOnly: true,
+    }
+    c.SetCookie("token", sessionjwt, 3600*24, "", "", false, true)
+    http.SetCookie(c.Writer, cookie)
 
-	c.SetCookie("RefreshToken", sessionjwt, 3600*24*30, "", "", false, true)
-	http.SetCookie(c.Writer, cookie)
+	refreshCookie := &http.Cookie{
+        Name:     "refresh_token",
+        Value:    RefreshToken,
+        Path:     "/",
+        Expires:  time.Now().Add(24 * time.Hour), 
+        HttpOnly: true,
+    }
+    c.SetCookie("refresh_token", RefreshToken, 3600*24, "", "", false, true)
+    http.SetCookie(c.Writer, refreshCookie)
+
+
 
 
 	fmt.Println(string(sessionjwt))
 	//fmt.Println(string(refreshToken))
 
-	c.JSON(http.StatusOK, gin.H{"token": sessionjwt})
-	c.JSON(http.StatusOK, gin.H{"refreshtoken": RefreshToken })
+	c.JSON(http.StatusOK, gin.H{"token": sessionjwt, "refresh_token": RefreshToken})
 }
 
 
