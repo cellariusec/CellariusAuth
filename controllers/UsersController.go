@@ -127,6 +127,13 @@ func Validate(c *gin.Context) {
 		return
 	}
 
+    var revokedToken models.RevokedToken
+    result := initializer.DB.Where("token = ?", tokenString).First(&revokedToken)
+    if result.Error == nil {
+        c.JSON(http.StatusUnauthorized, gin.H{"error": "Token has been revoked"})
+        return
+    }
+
 
 	token, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
 		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
@@ -154,6 +161,29 @@ func Validate(c *gin.Context) {
 
 	}
 }
+
+//var RevocationStore = make(map[string]bool)
+func Logout(c *gin.Context) {
+    var requestBody struct {
+        Token string `json:"token"`
+    }
+
+    if err := c.BindJSON(&requestBody); err != nil {
+        c.JSON(http.StatusBadRequest, gin.H{"error": "Failed to bind request body"})
+        return
+    }
+
+    revokedToken := models.RevokedToken{Token: requestBody.Token}
+    result := initializer.DB.Create(&revokedToken)
+    if result.Error != nil {
+        c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to revoke token"})
+        return
+    }
+
+    c.SetCookie("token", "", -1, "", "", false, true)
+    c.JSON(http.StatusOK, gin.H{"message": "Logout successful"})
+}
+
 //c.JSON(http.StatusOK, gin.H{"token": tokenString})
 /*
 curl -X POST -H "Content-Type: application/json" -d '{"Email":"example@example.com","Password":"password123"}' http://localhost:8080/signup
