@@ -50,7 +50,7 @@ func RefreshToken(c *gin.Context) {
     }
     */
 
-    tokenString, err := util.GenerateJWTs(c, user.Email, string(user.ID), "admin")
+    tokenString, err := util.GenerateJWTs(c, user.Email, string(rune(user.ID)), "admin")
     if err != nil {
         c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to generate token"})
         fmt.Println(err)

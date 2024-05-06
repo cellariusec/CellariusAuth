@@ -1,18 +1,20 @@
 package controllers
 
 import (
-	"fmt"
-	"time"
 	initializer "cellariusauth/initializers"
 	"cellariusauth/models"
 	"cellariusauth/util"
+	"fmt"
 	"log"
 	"net/http"
 	"os"
+	"time"
+
 	"github.com/gin-gonic/gin"
 	"github.com/golang-jwt/jwt/v4"
 	"golang.org/x/crypto/bcrypt"
-	
+	"gorm.io/driver/postgres"
+	"gorm.io/gorm"
 )
 
 
@@ -167,7 +169,15 @@ func Logout(c *gin.Context) {
     var requestBody struct {
         Token string `json:"token"`
     }
-
+	// conexion a base temporal para revocar token
+	dsn := "postgres://yjfgskzw:PRSNUNR2F8X8InPBIra5yi5xqozxMtx0@kala.db.elephantsql.com/yjfgskzw"
+	db, err := gorm.Open(postgres.Open(dsn), &gorm.Config{})
+	if err != nil {
+		fmt.Println(err)
+		c.AbortWithStatus(http.StatusInternalServerError)
+		c.Writer.Write([]byte("Error connecting to the database"))
+		return
+	}
     if err := c.BindJSON(&requestBody); err != nil {
         c.JSON(http.StatusBadRequest, gin.H{"error": "Failed to bind request body"})
         return
@@ -182,6 +192,13 @@ func Logout(c *gin.Context) {
 
     c.SetCookie("token", "", -1, "", "", false, true)
     c.JSON(http.StatusOK, gin.H{"message": "Logout successful"})
+
+	go func(){
+		time.Sleep((7*24 + 1) * time.Hour)
+		db.Delete(&revokedToken)
+		util.DeleteOldRecords(db)
+		 
+	}()
 }
 
 //c.JSON(http.StatusOK, gin.H{"token": tokenString})

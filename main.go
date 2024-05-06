@@ -17,10 +17,10 @@ func main() {
     r := gin.Default()
 
     config := cors.DefaultConfig()
-    config.AllowOrigins = []string{"http://localhost:3000", "https://your-frontend-domain.com"} // Replace with your frontend domains
+    config.AllowOrigins = []string{"http://localhost:3000", "https://your-frontend-domain.com"} 
     config.AllowCredentials = true
     config.AllowMethods = []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"}
-    config.AllowHeaders = []string{"Origin", "Content-Type", "Authorization", "Cookie"} // Add "Cookie" to allow sending cookies
+    config.AllowHeaders = []string{"Origin", "Content-Type", "Authorization", "Cookie"} 
 
     r.Use(cors.New(config))
 
