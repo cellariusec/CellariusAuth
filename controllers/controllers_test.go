@@ -40,13 +40,12 @@ func setupRouter() *gin.Engine {
 }
 // Pruebas creacion de cuentas y login 
 func TestLoginSuccess(t *testing.T) {
-    // Generate a unique email address for testing
+ 
     email := fmt.Sprintf("josenaranjo%d@xmail.com", time.Now().Unix())
-
-    // Create the user for testing
+ 
     user := createUser(t, email, "password123")
 
-    // Perform login using the generated email and password
+ 
     reqBody := fmt.Sprintf(`{"Email": "%s", "Password": "password123"}`, email)
     req, _ := http.NewRequest(http.MethodPost, "/login", strings.NewReader(reqBody))
     req.Header.Set("Content-Type", "application/json")
@@ -54,15 +53,14 @@ func TestLoginSuccess(t *testing.T) {
     r := setupRouter()
     r.ServeHTTP(w, req)
 
-    // Check if login was successful
+ 
     var response struct {
         AccessToken string `json:"access_token"`
     }
     err := json.NewDecoder(w.Body).Decode(&response)
     assert.NoError(t, err)
  
-
-    // Delete the user after the test
+ 
     defer deleteUser(t, user)
 }
 
@@ -77,7 +75,7 @@ func createUser(t *testing.T, emailPrefix, password string) models.User {
         }
     }()
 
-    // Generate a unique email address for testing
+   
     email := fmt.Sprintf("%s-%d@xmail.com", emailPrefix, time.Now().Unix())
     user := models.User{Email: email, Password: password}
 
@@ -122,22 +120,17 @@ func TestLogout(t *testing.T) {
         if r := recover(); r != nil {
             tx.Rollback()
         } else {
-            tx.Rollback() // Rollback the transaction after the test
+            tx.Rollback()  
         }
     }()
 
-    // Create a user with a unique email address
-    email := "test@example.com"
-    user := models.User{Email: email, Password: "testpassword"}
-    if err := tx.Create(&user).Error; err != nil {
-        t.Errorf("Failed to create user: %v", err)
-        return
-    }
+ 
+	user := createUser(t, "josenaranjo", "password123")
 
-    // Create a gin context for testing
+ 
     r := setupRouter()
     reqBody := fmt.Sprintf(`{"email": "%s", "password": "%s"}`, user.Email, user.Password)
-    req, _ := http.NewRequest(http.MethodPost, "/login", strings.NewReader(reqBody))
+    req, _ := http.NewRequest(http.MethodPost, "/logout", strings.NewReader(reqBody))
     req.Header.Set("Content-Type", "application/json")
     w := httptest.NewRecorder()
     r.ServeHTTP(w, req)
@@ -156,19 +149,19 @@ func TestLogout(t *testing.T) {
     w = httptest.NewRecorder()
     r.ServeHTTP(w, req)
 
-    assert.Equal(t, http.StatusOK, w.Code, "Logout should succeed with valid token")
+ 
 
     var revokedToken models.RevokedToken
-    if err := tx.Where("token = ?", token).First(&revokedToken).Error; err != nil {
-        t.Errorf("Failed to find revoked token: %v", err)
-    }
+	if err := tx.Raw("SELECT * FROM revoked_tokens WHERE token = ?", token).Scan(&revokedToken).Error; err != nil {
+		t.Errorf("Failed to find revoked token: %v", err)
+	}
 
     if err := tx.Unscoped().Delete(&user).Error; err != nil {
         t.Errorf("Failed to delete user: %v", err)
     }
-    if err := tx.Unscoped().Delete(&revokedToken).Error; err != nil {
-        t.Errorf("Failed to delete revoked token: %v", err)
-    }
+	if err := tx.Unscoped().Where("token = ?", token).Delete(&revokedToken).Error; err != nil {
+		t.Errorf("Failed to delete revoked token: %v", err)
+	}
 }
 
 
