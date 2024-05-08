@@ -105,7 +105,7 @@ func Login(c *gin.Context) {
         Name:     "refresh_token",
         Value:    RefreshToken,
         Path:     "/",
-        Expires:  time.Now().Add(24 * time.Hour), 
+        Expires:  time.Now().Add(7 * (24 * time.Hour)), 
         HttpOnly: true,
     }
     c.SetCookie("refresh_token", RefreshToken, 3600*24, "", "", false, true)
@@ -194,8 +194,7 @@ func Logout(c *gin.Context) {
     c.JSON(http.StatusOK, gin.H{"message": "Logout successful"})
 
 	go func(){
-		time.Sleep((7*24 + 1) * time.Hour)
-		db.Delete(&revokedToken)
+	 
 		util.DeleteOldRecords(db)
 		 
 	}()

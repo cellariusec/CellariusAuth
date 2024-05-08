@@ -13,9 +13,11 @@ import (
 	"os"
 	"strings"
 	"testing"
-
+    "gorm.io/driver/sqlite"
 	"github.com/gin-gonic/gin"
 	"github.com/stretchr/testify/assert"
+	//"gorm.io/driver/postgres"
+	"gorm.io/gorm"
 	//"gorm.io/gorm"
 )
 
@@ -108,13 +110,13 @@ func TestLoginInvalidCredentials(t *testing.T) {
 
  
 	assert.Equal(t, http.StatusBadRequest, w.Code)
-	assert.Contains(t, w.Body.String(), `"error": "Usuario no existe!"`)
+	assert.JSONEq(t, `{"error": "Usuario no existe!"}`, w.Body.String())
 }
 
 // pruebas Logout 
 
 func TestLogout(t *testing.T) {
-    // Start a transaction
+  
     tx := initializer.DB.Begin()
     defer func() {
         if r := recover(); r != nil {
@@ -162,6 +164,42 @@ func TestLogout(t *testing.T) {
 	if err := tx.Unscoped().Where("token = ?", token).Delete(&revokedToken).Error; err != nil {
 		t.Errorf("Failed to delete revoked token: %v", err)
 	}
+}
+
+
+func TestDeleteOldRecords(t *testing.T) {
+  
+    db, err := gorm.Open(sqlite.Open(":memory:"), &gorm.Config{})
+    if err != nil {
+        t.Fatalf("failed to create test database: %v", err)
+    }
+
+ 
+    err = db.AutoMigrate(&models.RevokedToken{})
+    if err != nil {
+        t.Fatalf("failed to migrate RevokedToken model: %v", err)
+    }
+
+    
+    oldRecord := models.RevokedToken{Token: "old_token"}
+    newRecord := models.RevokedToken{Token: "new_token"}
+
+    db.Create(&oldRecord)
+    time.Sleep(10 * time.Second)  
+    db.Create(&newRecord)
+ 
+    util.DeleteOldRecords(db)
+ 
+    var count int64
+    db.Model(&models.RevokedToken{}).Where("token = ?", oldRecord.Token).Count(&count)
+    if count != 0 {
+        t.Errorf("expected old record to be deleted, but it still exists")
+    }
+ 
+    db.Model(&models.RevokedToken{}).Where("token = ?", newRecord.Token).Count(&count)
+    if count != 1 {
+        t.Errorf("expected new record to be kept, but it was deleted")
+    }
 }
 
 
