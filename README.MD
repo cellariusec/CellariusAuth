@@ -16,3 +16,8 @@ http://localhost:5000/ValidateWebJWT?token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.
 ```
 
 
+# curl request para logout
+
+```
+curl -X POST http://localhost:8080/logout -H 'Content-Type: application/json' -d '{"token":"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJodHRwczovL2Rldi1hZjdhc3NvdmJvbTZhMjhvLnVzLmF1dGgwLmNvbS8iLCJzdWIiOiIyZVNhOFpOUVc2all5enhOb2hsR0RBQTJNZWlrVk90NUBjbGllbnRzIiwiYXVkIjoiaHR0cDovL2xvY2FsaG9zdDo1MDAwL2p3dCIsImlhdCI6MTcxMjYwNzA1NSwiZXhwIjoxNzkyOTkzOTU1LCJndHkiOiJjbGllbnQtY3JlZGVudGlhbHMiLCJhenAiOiIyZVNhOFpOUVc2all5enhOb2hsR0RBQTJNZWlrVk90NSJ9.a2uy0_mzxrAQ7KYT5uMvC0VhLjEt4y3ANM1q47EmKbg" }'
+```

@@ -188,7 +188,7 @@ func TestDeleteOldRecords(t *testing.T) {
     time.Sleep(10 * time.Second)  
     db.Create(&newRecord)
  
-    util.DeleteOldRecords(db)
+    util.DeleteExpiredTokens(db)
  
     var count int64
     db.Model(&models.RevokedToken{}).Where("token = ?", oldRecord.Token).Count(&count)

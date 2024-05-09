@@ -139,7 +139,7 @@ func Validate(c *gin.Context) {
 
 	token, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
 		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
-			return nil, fmt.Errorf("Metodo de firma no esperado:%v", token.Header["alg"])
+			return nil, fmt.Errorf("metodo de firma no esperado:%v", token.Header["alg"])
 
 		}
 		return []byte(os.Getenv("SECRET")), nil
@@ -183,8 +183,11 @@ func Logout(c *gin.Context) {
         return
     }
 
-    revokedToken := models.RevokedToken{Token: requestBody.Token}
-    result := initializer.DB.Create(&revokedToken)
+	expires_at := util.DecodeJWT(c,requestBody.Token)
+	expiresAt := time.Unix(expires_at, 0)
+
+    revokedToken := models.RevokedToken{Token: requestBody.Token,Expiry:expiresAt}
+    result := db.Create(&revokedToken)
     if result.Error != nil {
         c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to revoke token"})
         return
@@ -193,11 +196,6 @@ func Logout(c *gin.Context) {
     c.SetCookie("token", "", -1, "", "", false, true)
     c.JSON(http.StatusOK, gin.H{"message": "Logout successful"})
 
-	go func(){
-	 
-		util.DeleteOldRecords(db)
-		 
-	}()
 }
 
 //c.JSON(http.StatusOK, gin.H{"token": tokenString})
