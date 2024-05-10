@@ -9,7 +9,6 @@ import (
 	"net/http"
 	"os"
 	"time"
-
 	"github.com/gin-gonic/gin"
 	"github.com/golang-jwt/jwt/v4"
 	"golang.org/x/crypto/bcrypt"
@@ -210,6 +209,6 @@ curl -X POST -H "Content-Type: application/json" -d '{"Email":"example@example.c
 
 
 /*
-curl -X POST -H "Content-Type: application/json" -d '{"Email":"example@example.com","Password":"password123"}' https://independent-sparkle-production.up.railway.app/login
+curl -X POST -H "Content-Type: application/json" -d '{"Email":"example@example.com","Password":"password123"}' https://cellariusauth-production.up.railway.app/login
 
 */

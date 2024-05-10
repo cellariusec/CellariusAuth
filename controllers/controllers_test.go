@@ -1,21 +1,23 @@
 package controllers
 
 import (
+	"bytes"
 	initializer "cellariusauth/initializers"
 	"cellariusauth/models"
 	"cellariusauth/util"
 	"encoding/json"
-	"time"
-
 	"fmt"
 	"net/http"
 	"net/http/httptest"
 	"os"
 	"strings"
 	"testing"
-    "gorm.io/driver/sqlite"
+	"time"
+
 	"github.com/gin-gonic/gin"
 	"github.com/stretchr/testify/assert"
+	"gorm.io/driver/sqlite"
+
 	//"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 	//"gorm.io/gorm"
@@ -166,7 +168,7 @@ func TestLogout(t *testing.T) {
 	}
 }
 
-
+//!!
 func TestDeleteOldRecords(t *testing.T) {
   
     db, err := gorm.Open(sqlite.Open(":memory:"), &gorm.Config{})
@@ -203,3 +205,89 @@ func TestDeleteOldRecords(t *testing.T) {
 }
 
 
+
+func TestRevokeToken(t *testing.T){
+    db, err := gorm.Open(sqlite.Open(":memory:"), &gorm.Config{})
+    if err != nil {
+        t.Fatalf("failed to create test database: %v", err)
+    }
+
+    err = db.AutoMigrate(&models.RefreshToken{})
+    if err != nil {
+        t.Fatalf("failed to migrate RevokedToken model: %v", err)
+    }
+
+    userID := uint(1)
+
+    c,_ := gin.CreateTestContext(nil)
+
+    refreshToken,err := util.GenerateRefreshToken(c,userID)
+
+    if err != nil{
+        t.Fatalf("failed to generate refresh token: %v", err)
+    }
+    if refreshToken == "" {
+        t.Fatal("expected refresh token to be not empty")
+    }
+
+
+    existingToken := &models.RefreshToken{
+        UserID:    userID,
+        Token:     refreshToken,
+        ExpiresAt: time.Now().Add(time.Hour * 24 * 30),
+    }
+    db.Create(existingToken)
+
+    refreshToken, err = util.GenerateRefreshToken(c, userID)
+    if err != nil {
+        t.Fatalf("failed to generate refresh token: %v", err)
+    }
+    if refreshToken != existingToken.Token {
+        t.Fatal("expected refresh token to match existing token")
+    }
+}
+
+func TestRenewSession(t*testing.T){
+    db, err := gorm.Open(sqlite.Open(":memory:"), &gorm.Config{})
+    if err != nil {
+        t.Fatalf("failed to create test database: %v", err)
+    }
+
+    err = db.AutoMigrate(&models.User{})
+    if err != nil {
+        t.Fatalf("failed to migrate User model: %v", err)
+    }
+
+    err = db.AutoMigrate(&models.RefreshToken{})
+    if err != nil {
+        t.Fatalf("failed to migrate RefreshToken model: %v", err)
+    }
+
+user := createUser(t,"test@test.com","password123")
+
+refreshToken := models.RefreshToken{
+    Token:     "test_refresh_token",
+    UserID:    uint(user.ID),
+    ExpiresAt: time.Now().Add(time.Hour * 24 * 30),
+}
+db.Create(&refreshToken)
+c, _ := gin.CreateTestContext(nil)
+var jsonStr = []byte(`{"refresh_token": "test_refresh_token"}`)
+c.Request, _ = http.NewRequest(http.MethodPost, "/refresh_token", bytes.NewBuffer(jsonStr))
+c.Request.Header.Set("Content-Type", "application/json")
+
+
+RefreshToken(c)
+if c.Writer.Status() != http.StatusOK {
+    t.Fatalf("expected status code %d, but got %d", http.StatusOK, c.Writer.Status())
+}
+
+
+var response gin.H
+if err := c.ShouldBindJSON(&response); err != nil {
+    t.Fatalf("failed to parse response body: %v", err)
+}
+if _, ok := response["token"]; !ok {
+    t.Fatal("expected response body to contain 'token' field")
+}
+}
