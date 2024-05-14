@@ -13,18 +13,14 @@ import (
 	"strings"
 	"testing"
 	"time"
-
 	"github.com/gin-gonic/gin"
 	"github.com/stretchr/testify/assert"
-	"gorm.io/driver/sqlite"
-
-	//"gorm.io/driver/postgres"
+	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
-	//"gorm.io/gorm"
 )
 
 func TestMain(m *testing.M) {
-	os.Setenv("DB_CONNECTION_STRING", "postgres://yjfgskzw:PRSNUNR2F8X8InPBIra5yi5xqozxMtx0@kala.db.elephantsql.com/yjfgskzw")
+	os.Setenv("DB_CONNECTION_STRING", "postgres://avnadmin:AVNS_LNgImquHJXNIMn4aMTt@actixwebpostgres-udla-54df.aivencloud.com:18022/defaultdb?sslmode=require")
 	os.Setenv("ISSUER", "http://localhost:8080")
 	os.Setenv("SECRET","secret")
 	os.Setenv("JWT_SECRET","secret" )
@@ -95,6 +91,12 @@ func deleteUser(t *testing.T, user models.User) {
     if err := initializer.DB.Unscoped().Delete(&user).Error; err != nil {
         t.Errorf("Failed to delete user: %v", err)
     }
+}
+
+// pruebas de creacion de usuario
+
+func TestCreateUser(t *testing.T) {
+    createUser(t, "j@j.com", "password123")
 }
 
 // Pruebas con credenciales invalidas
@@ -170,18 +172,12 @@ func TestLogout(t *testing.T) {
 
 //!!
 func TestDeleteOldRecords(t *testing.T) {
-  
-    db, err := gorm.Open(sqlite.Open(":memory:"), &gorm.Config{})
-    if err != nil {
-        t.Fatalf("failed to create test database: %v", err)
-    }
 
- 
-    err = db.AutoMigrate(&models.RevokedToken{})
-    if err != nil {
-        t.Fatalf("failed to migrate RevokedToken model: %v", err)
-    }
-
+    dsn := os.Getenv("DB_CONNECTION_STRING")
+	db, err := gorm.Open(postgres.Open(dsn), &gorm.Config{})
+	if err != nil {
+		t.Fatalf("failed to create test database: %v", err)
+	}
     
     oldRecord := models.RevokedToken{Token: "old_token"}
     newRecord := models.RevokedToken{Token: "new_token"}
@@ -207,15 +203,11 @@ func TestDeleteOldRecords(t *testing.T) {
 
 
 func TestRevokeToken(t *testing.T){
-    db, err := gorm.Open(sqlite.Open(":memory:"), &gorm.Config{})
-    if err != nil {
-        t.Fatalf("failed to create test database: %v", err)
-    }
-
-    err = db.AutoMigrate(&models.RefreshToken{})
-    if err != nil {
-        t.Fatalf("failed to migrate RevokedToken model: %v", err)
-    }
+	dsn := os.Getenv("DB_CONNECTION_STRING")
+	db, err := gorm.Open(postgres.Open(dsn), &gorm.Config{})
+	if err != nil {
+		t.Fatalf("failed to create test database: %v", err)
+	}
 
     userID := uint(1)
 
@@ -248,11 +240,11 @@ func TestRevokeToken(t *testing.T){
 }
 
 func TestRenewSession(t*testing.T){
-    db, err := gorm.Open(sqlite.Open(":memory:"), &gorm.Config{})
-    if err != nil {
-        t.Fatalf("failed to create test database: %v", err)
-    }
-
+	dsn := os.Getenv("DB_CONNECTION_STRING")
+	db, err := gorm.Open(postgres.Open(dsn), &gorm.Config{})
+	if err != nil {
+		t.Fatalf("failed to create test database: %v", err)
+	}
     err = db.AutoMigrate(&models.User{})
     if err != nil {
         t.Fatalf("failed to migrate User model: %v", err)
