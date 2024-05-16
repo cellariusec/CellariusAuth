@@ -4,11 +4,13 @@ import (
 	initializer "cellariusauth/initializers"
 	"cellariusauth/models"
 	"cellariusauth/util"
+	"encoding/json"
 	"fmt"
 	"log"
 	"net/http"
 	"os"
 	"time"
+
 	"github.com/gin-gonic/gin"
 	"github.com/golang-jwt/jwt/v4"
 	"golang.org/x/crypto/bcrypt"
@@ -23,6 +25,8 @@ func Signup(c *gin.Context) {
 	var body struct {
 		Email    string
 		Password string
+		Cedula string
+		_        json.RawMessage `json:"-"`
 	}
 	if c.Bind(&body) != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid form"})
@@ -37,7 +41,7 @@ func Signup(c *gin.Context) {
 		return
 	}
 
-	user := models.User{Email: body.Email, Password: string(hash)}
+	user := models.User{Email: body.Email, Password: string(hash), Cedula: body.Cedula}
 	result := initializer.DB.Create(&user)
 
 	if result.Error != nil {

@@ -1,8 +1,6 @@
 package middleware
 
 import (
-	initializer "cellariusauth/initializers"
-	"cellariusauth/models"
 	"fmt"
 	"log"
 	"net/http"
@@ -18,13 +16,6 @@ func ValidateMiddleware (c *gin.Context) {
 		c.JSON(http.StatusUnauthorized, gin.H{"error": "no token provided"})
 		return
 	}
-
-    var revokedToken models.RevokedToken
-    result := initializer.DB.Where("token = ?", tokenString).First(&revokedToken)
-    if result.Error == nil {
-        c.JSON(http.StatusUnauthorized, gin.H{"error": "Token has been revoked"})
-        return
-    }
 
 
 	token, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
@@ -43,19 +34,15 @@ func ValidateMiddleware (c *gin.Context) {
 	if claims, ok := token.Claims.(jwt.MapClaims); ok && token.Valid {
 		log.Printf("Claims: %+v", claims)
 		Usertype := claims["usertype"].(string)
-		var requestData struct {
-            Username string `json:"username"`
-            Password string `json:"password"`
-            UserType string `json:"usertype"`
-        }
-        if err := c.ShouldBindJSON(&requestData); err != nil {
-            c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+        requiredUsertype := c.GetHeader("Usertype")
+        if requiredUsertype == "" {
+            c.JSON(http.StatusBadRequest, gin.H{"error": "Usertype header is required"})
             return
         }
 
-		fmt.Println("usertype:",requestData.UserType)
+		fmt.Println("usertype:",requiredUsertype)
 
-		if !IsAuthorizedToCreateUser(Usertype, requestData.UserType) {
+		if !IsAuthorizedToCreateUser(Usertype, requiredUsertype) {
 			c.JSON(http.StatusUnauthorized, gin.H{"error": "You are not authorized to create this user"})
 			return
 		}
