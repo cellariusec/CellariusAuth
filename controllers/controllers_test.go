@@ -1,19 +1,25 @@
 package controllers
 
 import (
+	//"bytes"
 	"bytes"
 	initializer "cellariusauth/initializers"
 	"cellariusauth/models"
 	"cellariusauth/util"
 	"encoding/json"
 	"fmt"
+
+	//"go/token"
+	//"log"
 	"net/http"
 	"net/http/httptest"
 	"os"
 	"strings"
 	"testing"
 	"time"
+
 	"github.com/gin-gonic/gin"
+//	"github.com/golang-jwt/jwt/v4"
 	"github.com/stretchr/testify/assert"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
@@ -239,47 +245,44 @@ func TestRevokeToken(t *testing.T){
     }
 }
 
-func TestRenewSession(t*testing.T){
-	dsn := os.Getenv("DB_CONNECTION_STRING")
-	db, err := gorm.Open(postgres.Open(dsn), &gorm.Config{})
-	if err != nil {
-		t.Fatalf("failed to create test database: %v", err)
-	}
-    err = db.AutoMigrate(&models.User{})
+func TestRefreshToken(t *testing.T) {
+ 
+    user := createUser(t, "test@test.com", "password123")
+    defer deleteUser(t, user)
+
+    c, _ := gin.CreateTestContext(httptest.NewRecorder())
+    refreshToken, err := util.GenerateRefreshToken(c, user.ID)
     if err != nil {
-        t.Fatalf("failed to migrate User model: %v", err)
+        t.Fatalf("failed to generate refresh token: %v", err)
     }
 
-    err = db.AutoMigrate(&models.RefreshToken{})
+    expiresAt := time.Now().Add(-1 * time.Hour)
+    err = initializer.DB.Model(&models.RefreshToken{}).Where("token = ?", refreshToken).Update("expires_at", expiresAt).Error
     if err != nil {
-        t.Fatalf("failed to migrate RefreshToken model: %v", err)
+        t.Fatalf("failed to update refresh token expiration: %v", err)
     }
 
-user := createUser(t,"test@test.com","password123")
-
-refreshToken := models.RefreshToken{
-    Token:     "test_refresh_token",
-    UserID:    uint(user.ID),
-    ExpiresAt: time.Now().Add(time.Hour * 24 * 30),
-}
-db.Create(&refreshToken)
-c, _ := gin.CreateTestContext(nil)
-var jsonStr = []byte(`{"refresh_token": "test_refresh_token"}`)
-c.Request, _ = http.NewRequest(http.MethodPost, "/refresh_token", bytes.NewBuffer(jsonStr))
-c.Request.Header.Set("Content-Type", "application/json")
+  
+    jsonStr := []byte(fmt.Sprintf(`{"refresh_token": "%s"}`, refreshToken))
+    req, _ := http.NewRequest(http.MethodPost, "/refresh_token", bytes.NewBuffer(jsonStr))
+    req.Header.Set("Content-Type", "application/json")
 
 
-RefreshToken(c)
-if c.Writer.Status() != http.StatusOK {
-    t.Fatalf("expected status code %d, but got %d", http.StatusOK, c.Writer.Status())
-}
+    w := httptest.NewRecorder()
 
 
-var response gin.H
-if err := c.ShouldBindJSON(&response); err != nil {
-    t.Fatalf("failed to parse response body: %v", err)
-}
-if _, ok := response["token"]; !ok {
-    t.Fatal("expected response body to contain 'token' field")
-}
+    r := gin.Default()
+    r.POST("/refresh_token", RefreshToken)
+
+    r.ServeHTTP(w, req)
+
+   
+    assert.Equal(t, http.StatusOK, w.Code)
+
+    var response struct {
+        Token string `json:"token"`
+    }
+    err = json.NewDecoder(w.Body).Decode(&response)
+    assert.NoError(t, err)
+    assert.NotEmpty(t, response.Token)
 }

@@ -4,6 +4,7 @@ import (
 	"cellariusauth/controllers"
 	initializer "cellariusauth/initializers"
 	"cellariusauth/util"
+    "cellariusauth/middleware"
 	"time"
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
@@ -47,7 +48,7 @@ func main() {
         })
     })
 
-    r.POST("/signup", controllers.Signup)
+    r.POST("/signup", middleware.ValidateMiddleware, controllers.Signup)
     r.POST("/login", controllers.Login)
     r.GET("/validate", controllers.Validate)
     r.POST("/refresh-token", controllers.RefreshToken)

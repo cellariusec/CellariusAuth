@@ -7,4 +7,5 @@ type User struct{
 	Email string `gorm:"unique"`
 	Password string
 	SessionToken string
+	Cedula string
 }

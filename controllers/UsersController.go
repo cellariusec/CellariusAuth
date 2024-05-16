@@ -56,6 +56,7 @@ func Login(c *gin.Context) {
 		Password string
 		OTPCode  string
 		UserType string
+		Cedula   string
 	}
 
 	if c.Bind(&body) != nil {
