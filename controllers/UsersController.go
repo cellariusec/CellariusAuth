@@ -22,6 +22,10 @@ import (
 
 func Signup(c *gin.Context) {
 
+	c.Writer.Header().Set("Access-Control-Allow-Origin", "*")
+	c.Writer.Header().Set("Access-Control-Allow-Methods", "POST, GET, OPTIONS, PUT, DELETE")
+	c.Writer.Header().Set("Access-Control-Allow-Headers", "Authorization, Content-Type, Usertype")
+
 	var body struct {
 		Email    string
 		Password string

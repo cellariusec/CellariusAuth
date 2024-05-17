@@ -3,14 +3,16 @@ package main
 import (
 	"cellariusauth/controllers"
 	initializer "cellariusauth/initializers"
+	"cellariusauth/middleware"
 	"cellariusauth/util"
-    "cellariusauth/middleware"
+	"net/http"
+	"os"
 	"time"
+
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
-    "os"
 )
 
 func init() {
@@ -38,7 +40,7 @@ func main() {
     config.AllowOrigins = []string{"http://localhost:3000", "https://verbose-orbit-ppxqpr7g9q6f6g4.github.dev"} 
     config.AllowCredentials = true
     config.AllowMethods = []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"}
-    config.AllowHeaders = []string{"Origin", "Content-Type", "Authorization", "Cookie"} 
+    config.AllowHeaders = []string{"Origin", "Content-Type", "Authorization", "Cookie", "Usertype"}
 
     r.Use(cors.New(config))
 
@@ -47,12 +49,21 @@ func main() {
             "message": "pong",
         })
     })
-
+    
+    r.OPTIONS("/signup", func(c *gin.Context) {
+   
+        c.Writer.Header().Set("Access-Control-Allow-Origin", "*")
+        c.Writer.Header().Set("Access-Control-Allow-Methods", "POST, GET, OPTIONS, PUT, DELETE")
+        c.Writer.Header().Set("Access-Control-Allow-Headers", "Authorization, Content-Type, Usertype")
+ 
+        c.AbortWithStatus(http.StatusOK)
+      })
     r.POST("/signup", middleware.ValidateMiddleware, controllers.Signup)
     r.POST("/login", controllers.Login)
     r.GET("/validate", controllers.Validate)
     r.POST("/refresh-token", controllers.RefreshToken)
     r.POST("/logout", controllers.Logout)
+ 
 
     ticker := time.NewTicker(1*time.Hour)
 
