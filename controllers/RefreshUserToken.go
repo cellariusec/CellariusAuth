@@ -6,8 +6,9 @@ import (
 	"cellariusauth/util"
 	"fmt"
 	"net/http"
-	//"time"
-	"github.com/gin-gonic/gin"
+	"time"
+    "github.com/gin-gonic/gin"
+	
 )
 
 func RefreshToken(c *gin.Context) {
@@ -33,7 +34,6 @@ func RefreshToken(c *gin.Context) {
         fmt.Println(err)
         return
     }
-/*
 
     if refreshToken.ExpiresAt.Before(time.Now()){
         c.JSON(http.StatusUnauthorized, gin.H{"error": "Refresh token expired"})
@@ -41,15 +41,13 @@ func RefreshToken(c *gin.Context) {
         return
     }
 
-
-
-    if err := initializer.DB.First(&user, refreshToken.UserID).Error; err != nil {
-        c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to find user"})
-        fmt.Println(err)
+    rt,err := util.GenerateRefreshToken(c, refreshToken.UserID)
+    if rt == "" {
+        c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to generate refresh token"})
+        fmt.Println("Failed to generate refresh token")
         return
     }
-    */
-
+ 
     tokenString, err := util.GenerateJWTs(c, user.Email, string(rune(user.ID)), "admin")
     if err != nil {
         c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to generate token"})
@@ -57,7 +55,7 @@ func RefreshToken(c *gin.Context) {
         return
     }
     fmt.Println("new session", tokenString)
-    c.JSON(http.StatusOK, gin.H{"token": tokenString})
+    c.JSON(http.StatusOK, gin.H{"session_token": tokenString, "user_token": rt})
 
 
 }
