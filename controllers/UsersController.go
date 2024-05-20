@@ -74,7 +74,7 @@ func Login(c *gin.Context) {
 
 	var user models.User
 	result := initializer.DB.Where("email = ?", body.Email).First(&user)
-
+ 
 	if result.Error != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Usuario no existe!"})
 		return
