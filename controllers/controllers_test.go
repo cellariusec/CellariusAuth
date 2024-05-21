@@ -8,18 +8,13 @@ import (
 	"cellariusauth/util"
 	"encoding/json"
 	"fmt"
-
-	//"go/token"
-	//"log"
 	"net/http"
 	"net/http/httptest"
 	"os"
 	"strings"
 	"testing"
 	"time"
-
 	"github.com/gin-gonic/gin"
-//	"github.com/golang-jwt/jwt/v4"
 	"github.com/stretchr/testify/assert"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
@@ -44,30 +39,40 @@ func setupRouter() *gin.Engine {
 	r.POST("/login", Login)
 	return r
 }
-// Pruebas creacion de cuentas y login 
+
+type loginTestCase struct {
+    Email    string
+    Password string
+    Expected int
+}
+
 func TestLoginSuccess(t *testing.T) {
- 
-    email := fmt.Sprintf("josenaranjo%d@xmail.com", time.Now().Unix())
- 
-    user := createUser(t, email, "password123")
-
- 
-    reqBody := fmt.Sprintf(`{"Email": "%s", "Password": "password123"}`, email)
-    req, _ := http.NewRequest(http.MethodPost, "/login", strings.NewReader(reqBody))
-    req.Header.Set("Content-Type", "application/json")
-    w := httptest.NewRecorder()
-    r := setupRouter()
-    r.ServeHTTP(w, req)
-
- 
-    var response struct {
-        AccessToken string `json:"access_token"`
+    testCases := []loginTestCase{
+        {Email: "josenaranjo1@xmail.com", Password: "password123", Expected: http.StatusOK},
+        {Email: "josenaranjo2@xmail.com", Password: "password123", Expected: http.StatusOK},
+        {Email: "josenaranjo3@xmail.com", Password: "password123", Expected: http.StatusOK},
     }
-    err := json.NewDecoder(w.Body).Decode(&response)
-    assert.NoError(t, err)
- 
- 
-    defer deleteUser(t, user)
+
+    for _, tc := range testCases {
+        user := createUser(t, tc.Email, tc.Password)
+
+        reqBody := fmt.Sprintf(`{"Email": "%s", "Password": "%s"}`, tc.Email, tc.Password)
+        req, _ := http.NewRequest(http.MethodPost, "/login", strings.NewReader(reqBody))
+        req.Header.Set("Content-Type", "application/json")
+        w := httptest.NewRecorder()
+        r := setupRouter()
+        r.ServeHTTP(w, req)
+
+        assert.Equal(t, tc.Expected, w.Code)
+
+        var response struct {
+            AccessToken string `json:"access_token"`
+        }
+        err := json.NewDecoder(w.Body).Decode(&response)
+        assert.NoError(t, err)
+
+        defer deleteUser(t, user)
+    }
 }
 
 

@@ -4,7 +4,6 @@ import (
 	initializer "cellariusauth/initializers"
 	"cellariusauth/models"
 	"cellariusauth/util"
-	"encoding/json"
 	"fmt"
 	"log"
 	"net/http"
@@ -30,7 +29,7 @@ func Signup(c *gin.Context) {
 		Email    string
 		Password string
 		Cedula string
-		_        json.RawMessage `json:"-"`
+		Usertype string
 	}
 	if c.Bind(&body) != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid form"})
@@ -45,7 +44,7 @@ func Signup(c *gin.Context) {
 		return
 	}
 
-	user := models.User{Email: body.Email, Password: string(hash), Cedula: body.Cedula}
+	user := models.User{Email: body.Email, Password: string(hash), Cedula: body.Cedula, Usertype: body.Usertype}
 	result := initializer.DB.Create(&user)
 
 	if result.Error != nil {
@@ -65,6 +64,7 @@ func Login(c *gin.Context) {
 		OTPCode  string
 		UserType string
 		Cedula   string
+		Usertype string
 	}
 
 	if c.Bind(&body) != nil {
