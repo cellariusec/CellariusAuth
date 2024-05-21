@@ -44,7 +44,7 @@ func Signup(c *gin.Context) {
 		return
 	}
 
-	user := models.User{Email: body.Email, Password: string(hash), Cedula: body.Cedula, Usertype: body.Usertype}
+	user := models.User{Email: body.Email, Password: string(hash), Cedula: body.Cedula, Usertype: c.GetHeader("Usertype")}
 	result := initializer.DB.Create(&user)
 
 	if result.Error != nil {
