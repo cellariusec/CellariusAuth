@@ -8,7 +8,6 @@ import (
 	"net/http"
 	"os"
 	"time"
-
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 	"gorm.io/driver/postgres"
@@ -64,7 +63,7 @@ func main() {
     r.GET("/validate", controllers.Validate)
     r.POST("/refresh-token", controllers.RefreshToken)
     r.POST("/logout", controllers.Logout)
- 
+    r.POST("/reset_password", controllers.ResetPassword)
 
     ticker := time.NewTicker(1*time.Hour)
 
