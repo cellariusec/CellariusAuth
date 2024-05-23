@@ -296,8 +296,7 @@ func SendResetEmail(email, token string) error {
     plainTextContent := fmt.Sprintf("Por favor usa el siguiente link para reestablecer tu contraseña cellarius: http://localhost:8080/reset_password?token=%s", token)
     htmlContent := fmt.Sprintf("<p>Por favor usa el siguiente link para reestablecer tu contraseña cellarius: <a href=\"http://localhost:8080/reset_password?token=%s\">Cambiar Contraseña</a></p>", token)
     message := mail.NewSingleEmail(from, subject, to, plainTextContent, htmlContent)
-	apiKey := "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"
-	//os.Getenv("SENDGRID_API_KEY")
+	apiKey := os.Getenv("SENDGRID_API_KEY")
 	client := sendgrid.NewSendClient(apiKey)
     response, err := client.Send(message)
     if err != nil {
