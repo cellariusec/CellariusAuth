@@ -86,7 +86,9 @@ func Login(c *gin.Context) {
 		return
 	}
 
- sessionjwt,err := util.GenerateJWTs(c,user.Email,string(rune(user.ID)),body.UserType)
+userType := user.Usertype
+
+ sessionjwt,err := util.GenerateJWTs(c,user.Email,string(rune(user.ID)),userType)
  if err != nil{
 	 c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to generate token"})
 	 return
