@@ -260,6 +260,7 @@ func ResetPassword(c *gin.Context) {
 		Email    string `json:"email"`
 		Password string `json:"password"`
 		NewPassword string `json:"new_password"`
+		Token       string `json:"token"`
 	}
 
 	if c.BindJSON(&body) != nil {
@@ -267,8 +268,15 @@ func ResetPassword(c *gin.Context) {
 		return
 	}
 
+	var resetToken models.ResetToken
+	result := initializer.DB.Where("token = ?", body.Token).First(&resetToken)
+	if result.Error == gorm.ErrRecordNotFound {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid token"})
+		return
+	}
+
 	var user models.User
-	result := initializer.DB.Where("email = ?", body.Email).First(&user)
+	result  = initializer.DB.Where("email = ?", body.Email).First(&user)
 	if result.Error == gorm.ErrRecordNotFound {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "User not found"})
 		return
