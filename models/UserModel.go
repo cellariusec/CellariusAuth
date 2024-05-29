@@ -1,6 +1,8 @@
 package models
 
-import "gorm.io/gorm"
+import (
+	"gorm.io/gorm"
+)
 
 type User struct{
 	gorm.Model
@@ -10,3 +12,4 @@ type User struct{
 	Cedula string
 	Usertype string
 }
+

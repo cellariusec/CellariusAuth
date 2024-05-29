@@ -36,6 +36,7 @@ func ValidateMiddleware (c *gin.Context) {
 	if claims, ok := token.Claims.(jwt.MapClaims); ok && token.Valid {
 		log.Printf("Claims: %+v", claims)
 		Usertype := claims["usertype"].(string)
+	
         requiredUsertype := c.GetHeader("Usertype")
         if requiredUsertype == "" {
             c.JSON(http.StatusBadRequest, gin.H{"error": "Usertype header is required"})

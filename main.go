@@ -58,13 +58,13 @@ func main() {
  
         c.AbortWithStatus(http.StatusOK)
       })
-    r.POST("/signup", middleware.ValidateMiddleware, controllers.Signup)
+      //middleware.ValidateMiddleware
+    r.POST("/signup",controllers.Signup)
     r.POST("/login", controllers.Login)
     r.GET("/validate", controllers.Validate)
     r.POST("/refresh-token", controllers.RefreshToken)
     r.POST("/logout", controllers.Logout)
-    r.POST("/request_password_reset",controllers.RequestPasswordReset) 
-    r.POST("/reset_password", controllers.ResetPassword)
+    r.POST("/reset_password",middleware.ValidateEmailMiddleware, controllers.ResetPassword)
 
     ticker := time.NewTicker(1*time.Hour)
 

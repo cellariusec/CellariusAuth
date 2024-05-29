@@ -4,8 +4,6 @@ import (
 	initializer "cellariusauth/initializers"
 	"cellariusauth/models"
 	"cellariusauth/util"
-	"crypto/rand"
-	"encoding/base64"
 	"fmt"
 	"log"
 	"net/http"
@@ -13,8 +11,6 @@ import (
 	"time"
 	"github.com/gin-gonic/gin"
 	"github.com/golang-jwt/jwt/v4"
-	"github.com/sendgrid/sendgrid-go"
-	"github.com/sendgrid/sendgrid-go/helpers/mail"
 	"golang.org/x/crypto/bcrypt"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
@@ -29,6 +25,7 @@ func Signup(c *gin.Context) {
 	c.Writer.Header().Set("Access-Control-Allow-Headers", "Authorization, Content-Type, Usertype")
 
 	var body struct {
+        ID uint
 		Email    string
 		Password string
 		Cedula string
@@ -49,15 +46,17 @@ func Signup(c *gin.Context) {
 
 	user := models.User{Email: body.Email, Password: string(hash), Cedula: body.Cedula, Usertype: c.GetHeader("Usertype")}
 	result := initializer.DB.Create(&user)
+	fmt.Println("resultado: ", result)
 
+	fmt.Print("id: ",user.ID)
 	if result.Error != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Error while creating user"})
 		return
 	}
 	signupResponse := models.SignupResponse{ID: user.ID}
+	fmt.Print(user.ID)
+	fmt.Println("signupResponse: ", signupResponse)
 	c.JSON(http.StatusOK, signupResponse)
-	c.JSON(http.StatusOK, gin.H{"message": "User created successfully"})
-
 }
 
 
@@ -130,7 +129,6 @@ userType := user.Usertype
 
 
 	fmt.Println(string(sessionjwt))
-	//fmt.Println(string(refreshToken))
 
 	c.JSON(http.StatusOK, gin.H{"token": sessionjwt, "refresh_token": RefreshToken})
 }
@@ -179,7 +177,7 @@ func Validate(c *gin.Context) {
 	}
 }
 
-//var RevocationStore = make(map[string]bool)
+
 func Logout(c *gin.Context) {
     var requestBody struct {
         Token string `json:"token"`
@@ -211,113 +209,6 @@ func Logout(c *gin.Context) {
     c.SetCookie("token", "", -1, "", "", false, true)
     c.JSON(http.StatusOK, gin.H{"message": "Logout successful"})
 
-}
-
-func generateResetToken() (string, error) {
-	b := make([]byte, 32)
-	_, err := rand.Read(b)
-	if err != nil {
-		return "", err
-	}
-	return base64.URLEncoding.EncodeToString(b), nil
-}	
-
-
-func RequestPasswordReset(c *gin.Context) {
-	var body struct {
-		Email string `json:"email"`
-	}
-
-	if c.BindJSON(&body) != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid request"})
-		return
-	}
-
-	var user models.User
-	result := initializer.DB.Where("email = ?", body.Email).First(&user)
-	if result.Error == gorm.ErrRecordNotFound {
-		c.JSON(http.StatusOK, gin.H{"message": "If this email exists, a reset link will be sent"})
-		return
-	}
-
-	token, err := generateResetToken()
-	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to generate reset token"})
-		return
-	}
-
-
-
-	// Send email with token (mocked here)
-	SendResetEmail(body.Email, token)
-	fmt.Printf("Password reset link: http://localhost:3000/Account?token=%s\n", token)
-
-	c.JSON(http.StatusOK, gin.H{"message": "If this email exists, a reset link will be sent"})
-}
-
-func ResetPassword(c *gin.Context) {
-	var body struct {
-		Email    string `json:"email"`
-		Password string `json:"password"`
-		NewPassword string `json:"new_password"`
-		Token       string `json:"token"`
-	}
-
-	if c.BindJSON(&body) != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid request"})
-		return
-	}
-
-	var resetToken models.ResetToken
-	result := initializer.DB.Where("token = ?", body.Token).First(&resetToken)
-	if result.Error == gorm.ErrRecordNotFound {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid token"})
-		return
-	}
-
-	var user models.User
-	result  = initializer.DB.Where("email = ?", body.Email).First(&user)
-	if result.Error == gorm.ErrRecordNotFound {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "User not found"})
-		return
-	}
-fmt.Println(body.Password)
-fmt.Println(body.NewPassword)
-fmt.Println(body.Email)
-	hash, err := bcrypt.GenerateFromPassword([]byte(body.NewPassword), bcrypt.DefaultCost)
-	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to hash password"})
-		return
-	}
-
-	user.Password = string(hash)
-	initializer.DB.Save(&user)
-
-	c.JSON(http.StatusOK, gin.H{"message": "Password reset successful"})
-}
-
-
-func SendResetEmail(email, token string) error {
-    from := mail.NewEmail("Example User", "jose.naranjo.martinez@udla.edu.ec")
-    subject := "Solicitud Cambio de contraseña Cellarius"
-    to := mail.NewEmail("User", email)
-    plainTextContent := fmt.Sprintf("Por favor usa el siguiente link para reestablecer tu contraseña cellarius: http://localhost:8080/reset_password?token=%s", token)
-    htmlContent := fmt.Sprintf("<p>Por favor usa el siguiente link para reestablecer tu contraseña cellarius: <a href=\"http://localhost:8080/reset_password?token=%s\">Cambiar Contraseña</a></p>", token)
-    message := mail.NewSingleEmail(from, subject, to, plainTextContent, htmlContent)
-	apiKey := os.Getenv("SENDGRID_API_KEY") 
-	client := sendgrid.NewSendClient(apiKey)
-    response, err := client.Send(message)
-    if err != nil {
-        return err
-		
-    }  else {
-		fmt.Println(response.StatusCode)
-		fmt.Println(response.Body)
-		fmt.Println(response.Headers)
-	}
-
-
-    return nil
 }
 
 //c.JSON(http.StatusOK, gin.H{"token": tokenString})
