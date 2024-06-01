@@ -8,7 +8,9 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"strconv"
 	"time"
+
 	"github.com/gin-gonic/gin"
 	"github.com/golang-jwt/jwt/v4"
 	"golang.org/x/crypto/bcrypt"
@@ -92,7 +94,8 @@ func Login(c *gin.Context) {
 
 userType := user.Usertype
 
- sessionjwt,err := util.GenerateJWTs(c,user.Email,string(rune(user.ID)),userType)
+ sessionjwt,err := util.GenerateJWTs(c,user.Email,strconv.Itoa(int(user.ID)),userType)
+ fmt.Println("userid: ",user.ID)
  if err != nil{
 	 c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to generate token"})
 	 return
