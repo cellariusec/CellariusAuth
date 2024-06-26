@@ -37,7 +37,7 @@ func main() {
 	r := gin.Default()
 
 	config := cors.DefaultConfig()
-	config.AllowOrigins = []string{"http://localhost:3000", "https://verbose-orbit-ppxqpr7g9q6f6g4.github.dev", "http://localhost:8080"}
+	config.AllowOrigins = []string{"http://localhost:3000", "https://cellariusec-cellarius-web-store-bul4-dy8ws7h5d.vercel.app", "https://verbose-orbit-ppxqpr7g9q6f6g4.github.dev", "http://localhost:8080"}
 	config.AllowCredentials = true
 	config.AllowMethods = []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"}
 	config.AllowHeaders = []string{"Origin", "Content-Type", "Authorization", "Cookie", "Usertype"}
