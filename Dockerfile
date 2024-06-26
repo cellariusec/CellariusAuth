@@ -16,6 +16,7 @@ COPY . .
 # Compila la aplicación
 RUN go build -o app main.go
 
+
 # Expone el puerto en el que la aplicación escucha
 EXPOSE 8080
 

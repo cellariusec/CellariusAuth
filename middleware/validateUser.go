@@ -34,7 +34,7 @@ func ValidateEmailMiddleware (c *gin.Context) {
 
 	if claims, ok := token.Claims.(jwt.MapClaims); ok && token.Valid {
 		log.Printf("Claims: %+v", claims)
-		Email := claims["email"].(string)
+		Email := claims["username"].(string)
 		c.Set("email", Email) 
 
 	

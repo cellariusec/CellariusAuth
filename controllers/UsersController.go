@@ -216,7 +216,7 @@ func Logout(c *gin.Context) {
 
 //c.JSON(http.StatusOK, gin.H{"token": tokenString})
 /*
-curl -X POST -H "Content-Type: application/json" -d '{"Email":"example@example.com","Password":"password123"}' http://localhost:8080/signup
+curl -X POST -H "Content-Type: application/json" -d '{"Email":"example@example.com","Password":"password123"}' http://localhost:6050/signup
 */
 
 /*
@@ -228,4 +228,6 @@ curl -X POST -H "Content-Type: application/json" -d '{"Email":"example@example.c
 /*
 curl -X POST -H "Content-Type: application/json" -d '{"Email":"example@example.com","Password":"password123"}' https://cellariusauth-production.up.railway.app/login
 
+curl -X POST -H "Content-Type: application/json" -d '{"Email":"jose@google.com","Password":"password1234"}' http://localhost:6050/login
 */
+

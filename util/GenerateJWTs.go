@@ -11,7 +11,7 @@ import (
 )
 
 func GenerateJWTs(c*gin.Context,username,userid,usertype string)(string, error) {
-    expirationTime := time.Now().Add(48 * time.Hour)
+    expirationTime := time.Now().Add(168 * time.Hour)
     fmt.Println("userid generate jwt: ",userid)
     token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
         "sub":   userid,
