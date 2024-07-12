@@ -16,9 +16,9 @@ import (
 
 func ResetPassword(c *gin.Context) {
 	var body struct {
-		Email       string `json:"email"`
-		Password    string `json:"password"`
-		NewPassword string `json:"new_password"`
+		Email           string `json:"email"`
+		CurrentPassword string `json:"current_password"`
+		NewPassword     string `json:"new_password"`
 	}
 
 	if err := c.BindJSON(&body); err != nil {
@@ -29,6 +29,7 @@ func ResetPassword(c *gin.Context) {
 
 	tokenstring := c.GetHeader("Authorization")
 	if tokenstring == "" {
+		fmt.Println("no token provided")
 		c.JSON(http.StatusUnauthorized, gin.H{"error": "no token provided"})
 		return
 	}
@@ -51,7 +52,6 @@ func ResetPassword(c *gin.Context) {
 
 		var user models.User
 		fmt.Println("Searching for user with email:", body.Email)
-		fmt.Println(user)
 
 		// Convert both email addresses to lower case for case-insensitive comparison
 		body.Email = strings.ToLower(body.Email)
@@ -68,13 +68,31 @@ func ResetPassword(c *gin.Context) {
 			return
 		}
 
+		fmt.Println("Fetched user:", user)
+
+		if user.Email == "" {
+			fmt.Println("User email is empty in the database")
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "User email is empty in the database"})
+			return
+		}
+
 		if user.Email != tokenEmail {
+			fmt.Println("user email", user.Email)
+			fmt.Println("token email", tokenEmail)
+			fmt.Println("Unauthorized", tokenEmail)
 			c.JSON(http.StatusUnauthorized, gin.H{"error": "Unauthorized"})
 			return
 		}
 
-		fmt.Println("Current password:", body.Password)
+		fmt.Println("Current password:", body.CurrentPassword)
 		fmt.Println("New password:", body.NewPassword)
+
+		// Verify current password
+		err = bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(body.CurrentPassword))
+		if err != nil {
+			c.JSON(http.StatusUnauthorized, gin.H{"error": "Incorrect current password"})
+			return
+		}
 
 		hash, err := bcrypt.GenerateFromPassword([]byte(body.NewPassword), bcrypt.DefaultCost)
 		if err != nil {
@@ -91,6 +109,7 @@ func ResetPassword(c *gin.Context) {
 
 		c.JSON(http.StatusOK, gin.H{"message": "Password reset successful"})
 	} else {
+		fmt.Println("Failed to authenticate")
 		c.JSON(http.StatusUnauthorized, gin.H{"error": "Failed to authenticate token"})
 	}
 }

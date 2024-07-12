@@ -13,6 +13,7 @@ func ValidateEmailMiddleware (c *gin.Context) {
 
 	
 	tokenString := c.GetHeader("Authorization")
+	fmt.Println(tokenString)
 	if tokenString == "" {
 		c.JSON(http.StatusUnauthorized, gin.H{"error": "no token provided"})
 		return

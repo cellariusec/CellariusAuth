@@ -37,7 +37,11 @@ func main() {
 	r := gin.Default()
 
 	config := cors.DefaultConfig()
-	config.AllowOrigins = []string{"http://localhost:3000", "https://verbose-orbit-ppxqpr7g9q6f6g4.github.dev", "http://localhost:8080"}
+	config.AllowOrigins = []string{"http://localhost:3000",
+		"https://cellariusec-cellarius-web-store.vercel.app",
+		"https://cellariusec-cellarius-web-store-icu5c4pzw-cellarius-projects.vercel.app",
+		"https://cellariusec-cellarius-web-store-git-main-cellarius-projects.vercel.app",
+		"http://localhost:8080"}
 	config.AllowCredentials = true
 	config.AllowMethods = []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"}
 	config.AllowHeaders = []string{"Origin", "Content-Type", "Authorization", "Cookie", "Usertype"}
@@ -73,5 +77,5 @@ func main() {
 		}
 	}()
 
-	r.Run(":6050")
+	r.Run(":5050")
 }
