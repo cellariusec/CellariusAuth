@@ -40,7 +40,7 @@ func RefreshToken(c *gin.Context) {
         fmt.Println("Refresh token expired")
         return
     }
-
+    
     rt,err := util.GenerateRefreshToken(c, refreshToken.UserID)
     if rt == "" {
         c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to generate refresh token"})
