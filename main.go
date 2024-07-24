@@ -68,6 +68,7 @@ func main() {
 	r.POST("/refresh-token", controllers.RefreshToken)
 	r.POST("/logout", controllers.Logout)
 	r.POST("/reset_password", middleware.ValidateEmailMiddleware, controllers.ResetPassword)
+	r.POST("/get_device_token", controllers.GetDeviceToken)
 
 	ticker := time.NewTicker(1 * time.Hour)
 

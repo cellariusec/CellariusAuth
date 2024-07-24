@@ -23,7 +23,7 @@ func Signup(c *gin.Context) {
 
 	c.Writer.Header().Set("Access-Control-Allow-Origin", "*")
 	c.Writer.Header().Set("Access-Control-Allow-Methods", "POST, GET, OPTIONS, PUT, DELETE")
-	c.Writer.Header().Set("Access-Control-Allow-Headers", "Authorization, Content-Type, Usertype")
+	c.Writer.Header().Set("Access-Control-Allow-Headers", "Authorization, Content-Type, Usertype,PaymentPlan")
 
 	var body struct {
         ID uint
@@ -31,6 +31,7 @@ func Signup(c *gin.Context) {
 		Password string
 		Cedula string
 		Usertype string
+		PaymentPlan string
 	}
 	if c.Bind(&body) != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid form"})
@@ -184,7 +185,6 @@ func Logout(c *gin.Context) {
     var requestBody struct {
         Token string `json:"token"`
     }
-	// conexion a base temporal para revocar token
 	dsn := "postgres://yjfgskzw:PRSNUNR2F8X8InPBIra5yi5xqozxMtx0@kala.db.elephantsql.com/yjfgskzw"
 	db, err := gorm.Open(postgres.Open(dsn), &gorm.Config{})
 	if err != nil {
