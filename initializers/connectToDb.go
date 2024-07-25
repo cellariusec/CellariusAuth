@@ -17,7 +17,7 @@ func ConnectToDb() {
 	encodedPassword := url.QueryEscape("AVNS_LNgImquHJXNIMn4aMTt")
 
 	
-	dsn := fmt.Sprintf("postgres://avnadmin:%s@actixwebpostgres-udla-54df.aivencloud.com:18022/defaultdb?sslmode=require", encodedPassword)
+	dsn := fmt.Sprintf("postgres://avnadmin:AVNS_LNgImquHJXNIMn4aMTt@147.182.201.146:18022/defaultdb?sslmode=require", encodedPassword)
 	//dsn := "postgres://avnadmin:AVNS_LNgImquHJXNIMn4aMTt@actixwebpostgres-udla-54df.aivencloud.com:18022/defaultdb?sslmode=require"
 	DB, err = gorm.Open(postgres.Open(dsn), &gorm.Config{})
 	DB.AutoMigrate(&models.User{})

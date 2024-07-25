@@ -10,7 +10,7 @@ import (
 )
 
 type DeviceRequest struct {
-	UserID int `json:"userid"`
+	UserID string `json:"userid"`
 }
 
 func GetDeviceToken(c *gin.Context) {

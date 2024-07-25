@@ -21,7 +21,7 @@ import (
 )
 
 func TestMain(m *testing.M) {
-	os.Setenv("DB_CONNECTION_STRING", "postgres://avnadmin:AVNS_LNgImquHJXNIMn4aMTt@actixwebpostgres-udla-54df.aivencloud.com:18022/defaultdb?sslmode=require")
+	os.Setenv("DB_CONNECTION_STRING", "postgres://avnadmin:AVNS_LNgImquHJXNIMn4aMTt@147.182.201.146:18022/defaultdb?sslmode=require")
 	os.Setenv("ISSUER", "http://localhost:8080")
 	os.Setenv("SECRET","secret")
 	os.Setenv("JWT_SECRET","secret" )

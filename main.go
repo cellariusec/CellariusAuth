@@ -16,7 +16,7 @@ import (
 )
 
 func init() {
-	os.Setenv("DB_CONNECTION_STRING", "postgres://yjfgskzw:PRSNUNR2F8X8InPBIra5yi5xqozxMtx0@kala.db.elephantsql.com/yjfgskzw")
+	os.Setenv("DB_CONNECTION_STRING", "postgres://yjfgskzw:PRSNUNR2F8X8InPBIra5yi5xqozxMtx0@54.151.28.69/yjfgskzw")
 	os.Setenv("ISSUER", "http://localhost:8080")
 	os.Setenv("SECRET", "secret")
 	os.Setenv("JWT_SECRET", "secret")
@@ -28,7 +28,7 @@ func init() {
 
 func main() {
 
-	blacklistDSN := "postgres://yjfgskzw:PRSNUNR2F8X8InPBIra5yi5xqozxMtx0@kala.db.elephantsql.com/yjfgskzw"
+	blacklistDSN := "postgres://yjfgskzw:PRSNUNR2F8X8InPBIra5yi5xqozxMtx0@54.151.28.69/yjfgskzw"
 	blacklistDB, err := gorm.Open(postgres.Open(blacklistDSN), &gorm.Config{})
 	if err != nil {
 		// Handle error
