@@ -28,6 +28,7 @@ func GetDeviceToken(c *gin.Context) {
 		"exp":   expirationTime.Unix(),
 		"iss":   os.Getenv("ISSUER"),
 		"aud":   os.Getenv("AUDIENCE"),
+		"device" : true,
 	})
 
 	token.Header["alg"] = "HS256"

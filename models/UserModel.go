@@ -11,5 +11,6 @@ type User struct{
 	SessionToken string
 	Cedula string
 	Usertype string
+	Blocked bool
 }
-
+ 

@@ -48,6 +48,7 @@ func Signup(c *gin.Context) {
 
 	user := models.User{Email: body.Email, Password: string(hash), Cedula: body.Cedula, Usertype: c.GetHeader("Usertype")}
 	result := initializer.DB.Create(&user)
+	fmt.Println("user: ", user.Password)
 	fmt.Println("resultado: ", result)
 
 	fmt.Print("id: ",user.ID)
@@ -89,6 +90,12 @@ func Login(c *gin.Context) {
 	err := bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(body.Password))
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid password"})
+		return
+	}
+	fmt.Println(user.Blocked)
+
+	if user.Blocked {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "Usuario bloqueado"})
 		return
 	}
 
